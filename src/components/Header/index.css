@@ -1,0 +1,89 @@
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  padding-left: 32px;
+  padding-right: 32px;
+  background-color: #1e1e30;
+}
+
+.header-heading {
+  color: #f8fafc;
+  font-family: 'Bree Serif';
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 24px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.india-text {
+  color: #007bff;
+}
+
+.link-styling {
+  text-decoration: none;
+}
+
+.nav-items-container {
+  padding: 0px;
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  margin: 0px;
+}
+
+.nav-item-text {
+  margin-left: 16px;
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  font-family: 'Roboto';
+  background-color: transparent;
+  outline: none;
+  border: 0px;
+  padding: 0px;
+  cursor: pointer;
+}
+
+.active-nav-item {
+  color: #f8fafc;
+  font-weight: 500;
+}
+
+@media (min-width: 850px) {
+  .navbar-container {
+    padding: 18px;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-container {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .header-heading {
+    font-size: 18px;
+  }
+
+  .nav-item-text {
+    font-size: 15px;
+    margin-left: 12px;
+  }
+}
+
+@media (max-width: 320px) {
+  .navbar-container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .header-heading {
+    font-size: 17px;
+  }
+}

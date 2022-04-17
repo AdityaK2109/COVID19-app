@@ -1,0 +1,89 @@
+.about-content-container {
+  padding: 50px;
+  width: 100vw;
+}
+
+.about-heading {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 34px;
+  line-height: 64px;
+  color: #f8fafc;
+  margin-top: 0px;
+}
+
+.about-page-para {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 36px;
+  color: #e2e8f0;
+}
+
+.faq-list-container {
+  list-style-type: none;
+  padding: 0px;
+}
+
+.each-faq-container {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.ques-text {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 32px;
+  color: #94a3b8;
+  margin-bottom: 0px;
+}
+
+.answer-text {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 32px;
+  color: #007bff;
+  margin-top: 8px;
+}
+
+@media (max-width: 850px) {
+  .about-content-container {
+    padding: 32px;
+  }
+
+  .about-heading {
+    font-size: 28px;
+  }
+
+  .about-page-para {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 600px) {
+  .about-content-container {
+    padding: 22px;
+  }
+
+  .about-heading {
+    font-size: 25px;
+  }
+
+  .about-page-para {
+    font-size: 16px;
+  }
+
+  .ques-text {
+    font-size: 14px;
+  }
+
+  .answer-text {
+    font-size: 14px;
+  }
+}
