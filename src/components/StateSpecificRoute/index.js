@@ -1,10 +1,10 @@
 import {Component} from 'react'
-import {format} from 'date-fns'
 import Loader from 'react-loader-spinner'
 import {
   LineChart,
   XAxis,
   YAxis,
+  LabelList,
   Tooltip,
   Legend,
   Line,
@@ -180,6 +180,16 @@ const options = {
   method: 'GET',
 }
 
+const dataFormatter = number => {
+  if (number > 100000) {
+    return `${(number / 100000).toFixed(1).toString()}L`
+  }
+  if (number > 1000) {
+    return `${(number / 1000).toFixed(1).toString()}K`
+  }
+  return number.toString()
+}
+
 class StateSpecificRoute extends Component {
   state = {
     apiStatus: apiStatusConstants.initial,
@@ -205,12 +215,15 @@ class StateSpecificRoute extends Component {
     const topDistrictList = initialList.sort((initial, next) =>
       initial.data > next.data ? -1 : 1,
     )
-    const barGraphDate = date => `${format(new Date(date), 'dd MMM')}`
     const barGraphData = graphDataObject.countryData.map(each => {
       console.log(each)
       return {
-        date: barGraphDate(each.date),
+        date: new Date(each.date).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+        }),
         data: each.confirmed,
+        labelValue: dataFormatter(each.confirmed ? each.confirmed : 0),
       }
     })
     this.setState({activeButton: 'CONFIRMED', topDistrictList, barGraphData})
@@ -225,12 +238,15 @@ class StateSpecificRoute extends Component {
     const topDistrictList = initialList.sort((initial, next) =>
       initial.data > next.data ? -1 : 1,
     )
-    const barGraphDate = date => `${format(new Date(date), 'dd MMM')}`
     const barGraphData = graphDataObject.countryData.map(each => {
       console.log(each)
       return {
-        date: barGraphDate(each.date),
+        date: new Date(each.date).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+        }),
         data: each.active,
+        labelValue: dataFormatter(each.active ? each.active : 0),
       }
     })
     this.setState({activeButton: 'ACTIVE', topDistrictList, barGraphData})
@@ -245,12 +261,15 @@ class StateSpecificRoute extends Component {
     const topDistrictList = initialList.sort((initial, next) =>
       initial.data > next.data ? -1 : 1,
     )
-    const barGraphDate = date => `${format(new Date(date), 'dd MMM')}`
     const barGraphData = graphDataObject.countryData.map(each => {
       console.log(each)
       return {
-        date: barGraphDate(each.date),
+        date: new Date(each.date).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+        }),
         data: each.recovered,
+        labelValue: dataFormatter(each.recovered ? each.recovered : 0),
       }
     })
     this.setState({activeButton: 'RECOVERED', topDistrictList, barGraphData})
@@ -265,12 +284,15 @@ class StateSpecificRoute extends Component {
     const topDistrictList = initialList.sort((initial, next) =>
       initial.data > next.data ? -1 : 1,
     )
-    const barGraphDate = date => `${format(new Date(date), 'dd MMM')}`
     const barGraphData = graphDataObject.countryData.map(each => {
       console.log(each)
       return {
-        date: barGraphDate(each.date),
+        date: new Date(each.date).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+        }),
         data: each.deceased,
+        labelValue: dataFormatter(each.deceased ? each.deceased : 0),
       }
     })
     this.setState({activeButton: 'DECEASED', topDistrictList, barGraphData})
@@ -281,23 +303,10 @@ class StateSpecificRoute extends Component {
     const {stateData} = graphDataObject
     console.log('bbb')
     console.log(stateData)
-    return stateData.map(each => {
-      const number = each.confirmed
-      let labelValue = ''
-      if (number > 1000) {
-        labelValue = `${Math.round(number / 1000, 1)}K`
-      }
-      if (number > 100000) {
-        labelValue = `${Math.round(number / 100000, 1)}L`
-      } else {
-        labelValue = number.toString()
-      }
-      return {
-        date: each.date,
-        data: each.confirmed,
-        labelValue,
-      }
-    })
+    return stateData.map(each => ({
+      date: each.date,
+      data: each.confirmed,
+    }))
   }
 
   getStateActiveData = () => {
@@ -339,7 +348,8 @@ class StateSpecificRoute extends Component {
   getGraphDetailsResponse = async () => {
     const {match} = this.props
     const {params} = match
-    const {id} = params
+    console.log(params)
+    const {stateCode} = params
     this.setState({graphApiStatus: apiStatusConstants.loading})
     const graphResponse = await fetch(
       'https://apis.ccbp.in/covid19-timelines-data',
@@ -347,9 +357,8 @@ class StateSpecificRoute extends Component {
     )
     if (graphResponse.ok === true) {
       const graphData = await graphResponse.json()
-      const selectedState = graphData[id].dates
+      const selectedState = graphData[stateCode].dates
       const acrossCountryData = graphData.TT.dates
-      console.log(selectedState)
       const graphDataObject = {
         stateData: Object.entries(selectedState).map(each => ({
           date: each[0],
@@ -375,11 +384,13 @@ class StateSpecificRoute extends Component {
           }))
           .slice(-10),
       }
-
-      const barGraphDate = date => `${format(new Date(date), 'dd MMM')}`
       const barGraphData = graphDataObject.countryData.map(each => ({
-        date: barGraphDate(each.date),
+        date: new Date(each.date).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+        }),
         data: each.confirmed ? each.confirmed : 0,
+        labelValue: dataFormatter(each.confirmed ? each.confirmed : 0),
       }))
       this.setState({
         graphApiStatus: apiStatusConstants.success,
@@ -392,17 +403,17 @@ class StateSpecificRoute extends Component {
   getApiResponse = async () => {
     const {match} = this.props
     const {params} = match
-    const {id} = params
+    const {stateCode} = params
     this.setState({
       apiStatus: apiStatusConstants.loading,
-      stateCode: id,
+      stateCode,
     })
     const apiUrl = 'https://apis.ccbp.in/covid19-state-wise-data'
     const response = await fetch(apiUrl, options)
     const data = await response.json()
 
     if (response.ok === true) {
-      const filteredObject = data[id]
+      const filteredObject = data[stateCode]
       const initialDistrictList = Object.entries(filteredObject.districts).map(
         eachData => ({
           id: eachData[0],
@@ -442,7 +453,7 @@ class StateSpecificRoute extends Component {
           recovered: checkDigitValue(filteredObject.total.recovered),
           tested: checkDigitValue(filteredObject.total.tested),
         },
-        date: filteredObject.meta.date,
+        date: filteredObject.meta.last_updated,
         districts: finalDistrictList,
       }
 
@@ -494,7 +505,42 @@ class StateSpecificRoute extends Component {
 
     console.log(barGraphData)
 
-    const formatDate = date => `${format(new Date(date), 'MMMM do yyyy')}`
+    const formatDate = date => {
+      const newDate = new Date(date)
+      console.log(date)
+      let day = newDate.getDate()
+      switch (day % 10) {
+        case 1:
+          day = `${day}st`
+          break
+        case 2:
+          day = `${day}nd`
+          break
+        case 3:
+          day = `${day}rd`
+          break
+        default:
+          day = `${day}th`
+          break
+      }
+      const monthList = [
+        'january',
+        'february',
+        'march',
+        'april',
+        'may',
+        'june',
+        'july',
+        'august',
+        'september',
+        'october',
+        'november',
+        'december',
+      ]
+
+      const month = monthList[newDate.getMonth()]
+      return `${month} ${day} ${newDate.getFullYear()}`
+    }
 
     const renderLoadingView = () => (
       <div testid="stateDetailsLoader" className="loading-container">
@@ -503,7 +549,7 @@ class StateSpecificRoute extends Component {
     )
 
     const lineChartFunction = (data, color, labelText) => {
-      const DataFormatter = number => {
+      const DataFormate = number => {
         if (number > 1000) {
           return `${(number / 1000).toString()}K`
         }
@@ -513,7 +559,7 @@ class StateSpecificRoute extends Component {
         return number.toString()
       }
       return (
-        <div testid="lineChartsContainer" className={labelText}>
+        <div className={labelText}>
           <p className="graph-name">{labelText}</p>
           <LineChart width={800} height={300} data={data}>
             <XAxis
@@ -527,7 +573,7 @@ class StateSpecificRoute extends Component {
             <YAxis
               tick={{fontSize: 13, strokeWidth: 0, fill: color}}
               dataKey="data"
-              tickFormatter={DataFormatter}
+              tickFormatter={DataFormate}
               stroke={color}
             />
 
@@ -558,9 +604,18 @@ class StateSpecificRoute extends Component {
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{stroke: this.barColorValue(activeButton)}}
+              tick={{
+                strokeWidth: '0',
+                fill: this.barColorValue(activeButton),
+              }}
               tickMargin="10"
               padding={{left: 30, right: 30}}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              dataKey="data"
+              tick={false}
             />
             <Legend />
             <Bar
@@ -568,34 +623,43 @@ class StateSpecificRoute extends Component {
               fill={this.barColorValue(activeButton)}
               label={{
                 position: 'top',
-                fill: this.barColorValue(activeButton),
-                value: 'labelValue',
+                content: 'labelValue',
               }}
               radius={[8, 8, 0, 0]}
               barSize="40%"
-              maxBarSize={30}
-            />
+              maxBarSize={42}
+            >
+              <LabelList
+                dataKey="labelValue"
+                position="top"
+                fill={this.barColorValue(activeButton)}
+                fontSize={15}
+                offset={10}
+              />
+            </Bar>
           </BarChart>
         </div>
         <div className="line-charts-container">
           <h1 className="daily-spread-trends-text">Daily Spread Trends</h1>
-          {lineChartFunction(
-            this.getStateConfirmedData(),
-            '#FF073A',
-            'Confirmed',
-          )}
-          {lineChartFunction(this.getStateActiveData(), '#007BFF', 'Active')}
-          {lineChartFunction(
-            this.getStateRecoveredData(),
-            '#27A243',
-            'Recovered',
-          )}
-          {lineChartFunction(
-            this.getStateDeceasedData(),
-            '#6C757D',
-            'Deceased',
-          )}
-          {lineChartFunction(this.getStateTestedData(), '#9673B9', 'Tested')}
+          <div testid="lineChartsContainer">
+            {lineChartFunction(
+              this.getStateConfirmedData(),
+              '#FF073A',
+              'Confirmed',
+            )}
+            {lineChartFunction(this.getStateActiveData(), '#007BFF', 'Active')}
+            {lineChartFunction(
+              this.getStateRecoveredData(),
+              '#27A243',
+              'Recovered',
+            )}
+            {lineChartFunction(
+              this.getStateDeceasedData(),
+              '#6C757D',
+              'Deceased',
+            )}
+            {lineChartFunction(this.getStateTestedData(), '#9673B9', 'Tested')}
+          </div>
         </div>
       </>
     )
@@ -623,7 +687,7 @@ class StateSpecificRoute extends Component {
               </div>
             </div>
             <p className="last-updated-date-text">
-              Last updated on {formatDate(selectedStateObject.date)}.
+              Last update on {formatDate(selectedStateObject.date)}.
             </p>
             <div className="button-container">
               <button

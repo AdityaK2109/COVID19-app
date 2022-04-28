@@ -216,6 +216,7 @@
   display: flex;
   flex-direction: column;
   overflow-x: auto;
+  text-align: end;
 }
 
 .Tested {
@@ -227,6 +228,7 @@
   display: flex;
   flex-direction: column;
   overflow-x: auto;
+  text-align: end;
 }
 
 .graph-name {

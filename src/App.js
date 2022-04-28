@@ -155,7 +155,7 @@ const statesList = [
 const App = () => (
   <Switch>
     <Route exact path="/" component={Home} />
-    <Route exact path="/state/:id" component={StateSpecificRoute} />
+    <Route exact path="/state/:stateCode" component={StateSpecificRoute} />
     <Route exact path="/about" component={AboutRoute} />
     <Route path="/bad-path" component={NotFoundRoute} />
     <Redirect to="/bad-path" />

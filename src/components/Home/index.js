@@ -166,7 +166,6 @@ class Home extends Component {
   state = {
     apiStatus: apiStatusConstants.initial,
     searchInput: '',
-    showSuggestionBox: false,
     stateViseCovidList: [],
     isDescending: false,
   }
@@ -184,11 +183,11 @@ class Home extends Component {
     const response = await fetch(apiUrl, options)
     if (response.ok === true) {
       const data = await response.json()
+      console.log(data)
       const updatedData = Object.entries(data).map(eachData => ({
         id: eachData[0],
         ...eachData[1],
       }))
-
       this.setState({
         stateViseCovidList: updatedData,
         apiStatus: apiStatusConstants.success,
@@ -197,13 +196,8 @@ class Home extends Component {
   }
 
   onChangeSearchInput = event => {
-    let updatedValue = true
-    if (event.target.value === '') {
-      updatedValue = false
-    }
     this.setState({
       searchInput: event.target.value,
-      showSuggestionBox: updatedValue,
     })
   }
 
@@ -215,7 +209,6 @@ class Home extends Component {
         updatedList = [eachState, ...updatedList]
         return updatedList
       })
-      console.log(updatedList)
       this.setState({stateViseCovidList: updatedList, isDescending: false})
     }
   }
@@ -228,22 +221,19 @@ class Home extends Component {
         updatedList = [eachState, ...updatedList]
         return updatedList
       })
-      console.log(updatedList)
       this.setState({stateViseCovidList: updatedList, isDescending: true})
     }
   }
 
   render() {
-    const {
-      apiStatus,
-      searchInput,
-      showSuggestionBox,
-      stateViseCovidList,
-    } = this.state
+    const {apiStatus, searchInput, stateViseCovidList} = this.state
     console.log(stateViseCovidList)
-    const updatedList = statesList.filter(eachState =>
+    let updatedList = statesList.filter(eachState =>
       eachState.state_code.toLowerCase().startsWith(searchInput.toLowerCase()),
     )
+    if (searchInput === '') {
+      updatedList = []
+    }
 
     const renderLoadingView = () => (
       <div testid="homeRouteLoader" className="loading-container">
@@ -254,7 +244,10 @@ class Home extends Component {
     const renderSuccessView = () => {
       const totalObject = stateViseCovidList.filter(each => each.id === 'TT')[0]
       const total = {...totalObject}
-      const {confirmed, deceased, recovered} = {...total.total}
+      let {confirmed, deceased, recovered} = {...total.total}
+      confirmed = confirmed || 0
+      deceased = deceased || 0
+      recovered = recovered || 0
       const active = confirmed - recovered - deceased
       return (
         <div className="page-content-container">
@@ -269,30 +262,26 @@ class Home extends Component {
                 className="input-tag"
               />
             </div>
-            {showSuggestionBox && (
-              <ul
-                testid="searchResultsUnorderedList"
-                className="search-results-unordered-list"
-              >
-                {updatedList.map(eachState => (
-                  <Link
-                    to={`/state/${eachState.state_code}`}
-                    style={{textDecoration: 'none'}}
-                    key={eachState.state_code}
-                  >
-                    <li className="each-state-item">
-                      <p className="state-name">{eachState.state_name}</p>
-                      <div className="state-code-container">
-                        <p className="state-code-text">
-                          {eachState.state_code}
-                        </p>
-                        <BiChevronRightSquare size={24} color="#facc15" />
-                      </div>
-                    </li>
-                  </Link>
-                ))}
-              </ul>
-            )}
+            <ul
+              testid="searchResultsUnorderedList"
+              className="search-results-unordered-list"
+            >
+              {updatedList.map(eachState => (
+                <Link
+                  to={`/state/${eachState.state_code}`}
+                  style={{textDecoration: 'none'}}
+                  key={eachState.state_code}
+                >
+                  <li className="each-state-item">
+                    <p className="state-name">{eachState.state_name}</p>
+                    <div className="state-code-container">
+                      <p className="state-code-text">{eachState.state_code}</p>
+                      <BiChevronRightSquare size={24} color="#facc15" />
+                    </div>
+                  </li>
+                </Link>
+              ))}
+            </ul>
           </div>
           <div className="cards-container">
             <div
@@ -346,18 +335,18 @@ class Home extends Component {
                 <div className="state-ut-container">
                   <p className="header-text">States/UT</p>
                   <button
+                    testid="ascendingSort"
                     type="button"
                     className="btn"
                     onClick={this.onClickAsc}
-                    testid="ascendingSort"
                   >
                     <FcGenericSortingAsc color="#94A3B8" size={20} />
                   </button>
                   <button
+                    testid="descendingSort"
                     type="button"
                     className="btn"
                     onClick={this.onClickDesc}
-                    testid="descendingSort"
                   >
                     <FcGenericSortingDesc color="#94A3B8" size={20} />
                   </button>
@@ -380,10 +369,16 @@ class Home extends Component {
               </li>
               {stateViseCovidList.map(eachState => {
                 if (eachState.id !== 'TT') {
+                  let confirmedCases = eachState.total.confirmed
+                  let deceasedCases = eachState.total.deceased
+                  let recoveredCases = eachState.total.recovered
+                  let {population} = eachState.meta
+                  confirmedCases = confirmedCases || 0
+                  deceasedCases = deceasedCases || 0
+                  recoveredCases = recoveredCases || 0
+                  population = population || 0
                   const activeCases =
-                    eachState.total.confirmed -
-                    eachState.total.recovered -
-                    eachState.total.deceased
+                    confirmedCases - recoveredCases - deceasedCases
                   const stateName = statesList.find(
                     eachData => eachData.state_code === eachState.id,
                   )
@@ -393,27 +388,19 @@ class Home extends Component {
                         <p className="state-ut-text">{stateName.state_name}</p>
                       </div>
                       <div className="confirmed-container">
-                        <p className="confirmed-text">
-                          {eachState.total.confirmed}
-                        </p>
+                        <p className="confirmed-text">{confirmedCases}</p>
                       </div>
                       <div className="active-container">
                         <p className="active-text">{activeCases}</p>
                       </div>
                       <div className="recovered-container">
-                        <p className="recovered-text">
-                          {eachState.total.recovered}
-                        </p>
+                        <p className="recovered-text">{recoveredCases}</p>
                       </div>
                       <div className="deceased-container">
-                        <p className="deceased-text">
-                          {eachState.total.deceased}
-                        </p>
+                        <p className="deceased-text">{deceasedCases}</p>
                       </div>
                       <div className="population-container">
-                        <p className="population-text">
-                          {eachState.meta.population}
-                        </p>
+                        <p className="population-text">{population}</p>
                       </div>
                     </li>
                   )
