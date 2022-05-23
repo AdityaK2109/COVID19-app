@@ -225,9 +225,13 @@ class Home extends Component {
     }
   }
 
+  onChangeSearchInput = event => {
+    this.setState({searchInput: event.target.value})
+  }
+
   render() {
     const {apiStatus, searchInput, stateViseCovidList} = this.state
-    console.log(stateViseCovidList)
+    console.log(searchInput)
     let updatedList = statesList.filter(eachState =>
       eachState.state_code.toLowerCase().startsWith(searchInput.toLowerCase()),
     )
@@ -262,26 +266,30 @@ class Home extends Component {
                 className="input-tag"
               />
             </div>
-            <ul
-              testid="searchResultsUnorderedList"
-              className="search-results-unordered-list"
-            >
-              {updatedList.map(eachState => (
-                <Link
-                  to={`/state/${eachState.state_code}`}
-                  style={{textDecoration: 'none'}}
-                  key={eachState.state_code}
-                >
-                  <li className="each-state-item">
-                    <p className="state-name">{eachState.state_name}</p>
-                    <div className="state-code-container">
-                      <p className="state-code-text">{eachState.state_code}</p>
-                      <BiChevronRightSquare size={24} color="#facc15" />
-                    </div>
-                  </li>
-                </Link>
-              ))}
-            </ul>
+            {searchInput !== '' && (
+              <ul
+                testid="searchResultsUnorderedList"
+                className="search-results-unordered-list"
+              >
+                {updatedList.map(eachState => (
+                  <Link
+                    to={`/state/${eachState.state_code}`}
+                    style={{textDecoration: 'none'}}
+                    key={eachState.state_code}
+                  >
+                    <li className="each-state-item">
+                      <p className="state-name">{eachState.state_name}</p>
+                      <div className="state-code-container">
+                        <p className="state-code-text">
+                          {eachState.state_code}
+                        </p>
+                        <BiChevronRightSquare size={24} color="#facc15" />
+                      </div>
+                    </li>
+                  </Link>
+                ))}
+              </ul>
+            )}
           </div>
           <div className="cards-container">
             <div
